@@ -4,14 +4,15 @@ from bs4 import BeautifulSoup
 import requests
 import re
 import json
+import sys
+import shutil
 
 def auth():
     authfile = open('.tlauth')
     authdata = json.load(authfile)
-    USERNAME = authdata['name']
-    PASSWORD = authdata['password']
-    LOGINURL = 'http://torrentleech.org/user/account/login/'
-    DATAURL = 'http://torrentleech.org/torrents/browse/index/categories/13,14'
+    authurl = 'http://torrentleech.org/user/account/login/'
+    username = authdata['name']
+    password = authdata['password']
 
     session = requests.session()
     req_headers = {
@@ -19,23 +20,33 @@ def auth():
     }
 
     formdata = {
-        'username': USERNAME,
-        'password': PASSWORD,
+        'username': username,
+        'password': password,
         'login': 'submit'
     }
 
     # Authenticate
-    r = session.post(LOGINURL, data=formdata, headers=req_headers, allow_redirects=False)
+    r = session.post(authurl, data=formdata, headers=req_headers, allow_redirects=False)
+    if r.status_code == 200:
+        print('Error: Unable to Authenticate')
+        sys.exit(1)
+
+    gather(session)
+
+def gather(session):
+    targeturl = 'http://torrentleech.org/torrents/browse/index/categories/13,14'
 
     # Read data
-    r2 = session.get(DATAURL)
-    data = r2.text
-    gather(data)
+    r = session.get(targeturl)
+    data = r.text
 
-def gather(data):
+    parse(data)
+
+def parse(data):
     soup = BeautifulSoup(data)
     torrent = {}
     torrentList = {}
+    tmpFile = open('torrent_list.tmp', 'w')
 
     for info in soup.find_all(class_="even"):
         name = info.find(class_="title")
@@ -43,10 +54,25 @@ def gather(data):
         torrent[name.string] = 'http://torrentleech.org' + url
 
     torrentList = [{'name':key,'url':value} for key,value in torrent.items()]
-    print(json.dumps(torrentList, sort_keys=True))
+    print >> tmpFile, json.dumps(torrentList, sort_keys=True)
+
+    tmpFile.close()
+
+def validate():
+    tmpFile = open('torrent_list.tmp', 'r')
+
+    try:
+        tmpJson = json.load(tmpFile)
+        return True
+    except ValueError:
+        return False
+
+    tmpFile.close()
 
 def main():
     auth()
+    if validate():
+        shutil.move('torrent_list.tmp','torrent_list')
 
 if __name__ == "__main__":
     main()
