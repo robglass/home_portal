@@ -27,11 +27,11 @@ def auth():
 
     # Authenticate
     r = session.post(authurl, data=formdata, headers=req_headers, allow_redirects=False)
-    if r.status_code == 200:
-        print('Error: Unable to Authenticate')
-        sys.exit(1)
+    if r.status_code == 302:
+        gather(session)
 
-    gather(session)
+    print('Error: Unable to Authenticate')
+    sys.exit(1)
 
 def gather(session):
     targeturl = 'http://torrentleech.org/torrents/browse/index/categories/13,14'
@@ -72,7 +72,7 @@ def validate():
 def main():
     auth()
     if validate():
-        shutil.move('torrent_list.tmp','torrent_list')
+        shutil.move('torrent_list.tmp','torrent_list.json')
 
 if __name__ == "__main__":
     main()
