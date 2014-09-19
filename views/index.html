@@ -3,10 +3,31 @@
 <head>
   <meta charset="UTF-8">
   <title>Home Portal</title>
-  <link rel="stylesheet" href="http//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 </head>
 <body>
-  <h1>Home_Portal</h1>
+  <nav class="navbar navbar-inverse" role="navigation">
+  <div class="container">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <a class="navbar-brand" href="#">Home_Portal</a>
+    </div>
+  </div><!-- /.container-fluid -->
+  </nav>
+  <div class="container">
+	<div class="row">
+	<div class="panel panel-defualt">
+	<div class="panel-heading">
+		<h3 class="panel-title">Torrent List</h3>
+	</div>
+	<div class="panel-body">
+	<table id="torrentTable" class="table table-striped">
+	<thead><tr><td>Torrent</td><td>Link</td></tr></thead>
+        </table>
+	</div>
+	</div>
+	</div>
+  </div>
 </body>
 <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
 <script src="javascripts/app.js"></script>
