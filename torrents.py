@@ -29,12 +29,12 @@ def auth():
     r = session.post(authurl, data=formdata, headers=req_headers, allow_redirects=False)
     if r.status_code == 302:
         gather(session)
-
-    print('Error: Unable to Authenticate')
-    sys.exit(1)
+    else:
+        print('Error: Unable to Authenticate')
+        sys.exit(1)
 
 def gather(session):
-    targeturl = 'http://torrentleech.org/torrents/browse/index/categories/13,14'
+    targeturl = 'http://torrentleech.org/torrents/browse/index/categories/13%2C14/page/1'
 
     # Read data
     r = session.get(targeturl)
@@ -49,6 +49,11 @@ def parse(data):
     tmpFile = open('torrent_list.tmp', 'w')
 
     for info in soup.find_all(class_="even"):
+        name = info.find(class_="title")
+        url = info.find(class_="quickdownload").find('a').get('href')
+        torrent[name.string] = 'http://torrentleech.org' + url
+
+    for info in soup.find_all(class_="odd"):
         name = info.find(class_="title")
         url = info.find(class_="quickdownload").find('a').get('href')
         torrent[name.string] = 'http://torrentleech.org' + url
