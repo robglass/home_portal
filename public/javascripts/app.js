@@ -7,7 +7,7 @@ App = (function(){
     success: function(json){
 	var torrents = $.parseJSON(json);
         for (var key in torrents) {
-         $('#torrentTable').append('<tr><td>'+torrents[key].name+'</td><td><a href="'+torrents[key].url+'"><button type="button" class="btn btn-primary">Download</button></a></td></tr>');
+         $('#torrentTable').append('<tr><td>'+torrents[key].name+'</td><td>'+torrents[key].date+'</td><td><a href="'+torrents[key].url+'"><button type="button" class="btn btn-primary">Download</button></a></td></tr>');
 
         }
     }	  
