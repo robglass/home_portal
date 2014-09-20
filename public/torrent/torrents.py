@@ -55,9 +55,12 @@ def parse(data):
         url = info.find(class_="quickdownload").find('a').get('href')
         date = info.find(class_="name")
         dateRegex = re.match("^.*(\d{4}[-]\d{2}[-]\d{2}\s\d{2}[:]\d{2}[:]\d{2}).*$",str(date),re.DOTALL)
+        size = info.find_all('td')
+        sizeRegex = re.match("^.*[<td>](\d.*\s\w\w)[</td>].*$",str(size),re.DOTALL)
         torrent['name'] = str(name.string)
         torrent['url'] = 'http://torrentleech.org' + url
         torrent['date'] = dateRegex.group(1)
+        torrent['size'] = sizeRegex.group(1)
         torrentEven.append(torrent)
 
     for info in soup.find_all(class_="odd"):
@@ -66,9 +69,12 @@ def parse(data):
         url = info.find(class_="quickdownload").find('a').get('href')
         date = info.find(class_="name")
         dateRegex = re.match("^.*(\d{4}[-]\d{2}[-]\d{2}\s\d{2}[:]\d{2}[:]\d{2}).*$",str(date),re.DOTALL)
+        size = info.find_all('td')
+        sizeRegex = re.match("^.*[<td>](\d.*\s\w\w)[</td>].*$",str(size),re.DOTALL)
         torrent['name'] = str(name.string)
         torrent['url'] = 'http://torrentleech.org' + url
         torrent['date'] = dateRegex.group(1)
+        torrent['size'] = sizeRegex.group(1)
         torrentOdd.append(torrent)
 
     torrentList = torrentEven + torrentOdd
