@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <title>Home Portal</title>
   <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+  <script src="sortable.min.js"></script>
+ <link rel="stylesheet" href="sortable-theme-bootstrap.css" />
 </head>
 <body>
   <nav class="navbar navbar-inverse" role="navigation">
@@ -21,8 +23,8 @@
 		<h3 class="panel-title">Torrent List</h3>
 	</div>
 	<div class="panel-body">
-	<table id="torrentTable" class="table table-striped">
-	<thead><tr><td>Torrent</td><td>Date</td><td>Link</td></tr></thead>
+	<table id="torrentTable" class="sortable-theme-bootstrap" data-sortable>
+	<thead><tr><th>Torrent</th><th>Size</th><th>Date</th><th data-sortable="false">Link</th></tr></thead>
         </table>
 	</div>
 	</div>
