@@ -43,7 +43,6 @@ def parse(session):
     finally:
         for x in range(1,6):
             targeturl = 'http://torrentleech.org/torrents/browse/index/categories/13%2C14/page/' + str(x)
-            print(targeturl)
             r = session.get(targeturl)
             data = r.text
             soup = BeautifulSoup(data)
@@ -55,11 +54,18 @@ def parse(session):
                 date = info.find(class_="name")
                 dateRegex = re.match("^.*(\d{4}[-]\d{2}[-]\d{2}\s\d{2}[:]\d{2}[:]\d{2}).*$",str(date),re.DOTALL)
                 size = info.find_all('td')
-                sizeRegex = re.match("^.*[<td>](\d.*\s\w\w)[</td>].*$",str(size),re.DOTALL)
+                sizeRegex = re.match("^.*[<td>](\d.*)\s(\w\w)[</td>].*$",str(size),re.DOTALL)
                 torrent['name'] = str(name.string)
                 torrent['url'] = 'http://torrentleech.org' + url
                 torrent['date'] = dateRegex.group(1)
-                torrent['size'] = sizeRegex.group(1)
+                torrent['size'] = sizeRegex.group(1) + ' ' + sizeRegex.group(2)
+
+                if sizeRegex.group(2) == 'GB':
+                    sizemb = float(sizeRegex.group(1)) * 1024
+                else:
+                    sizemb = float(sizeRegex.group(1))
+
+                torrent['sizemb'] = sizemb
                 torrentEven.append(torrent)
 
             for info in soup.find_all(class_="odd"):
@@ -69,11 +75,18 @@ def parse(session):
                 date = info.find(class_="name")
                 dateRegex = re.match("^.*(\d{4}[-]\d{2}[-]\d{2}\s\d{2}[:]\d{2}[:]\d{2}).*$",str(date),re.DOTALL)
                 size = info.find_all('td')
-                sizeRegex = re.match("^.*[<td>](\d.*\s\w\w)[</td>].*$",str(size),re.DOTALL)
+                sizeRegex = re.match("^.*[<td>](\d.*)\s(\w\w)[</td>].*$",str(size),re.DOTALL)
                 torrent['name'] = str(name.string)
                 torrent['url'] = 'http://torrentleech.org' + url
                 torrent['date'] = dateRegex.group(1)
-                torrent['size'] = sizeRegex.group(1)
+                torrent['size'] = sizeRegex.group(1) + ' ' + sizeRegex.group(2)
+
+                if sizeRegex.group(2) == 'GB':
+                    sizemb = float(sizeRegex.group(1)) * 1024
+                else:
+                    sizemb = float(sizeRegex.group(1))
+
+                torrent['sizemb'] = sizemb
                 torrentOdd.append(torrent)
 
         torrentList = torrentEven + torrentOdd
