@@ -44,21 +44,34 @@ def gather(session):
 
 def parse(data):
     soup = BeautifulSoup(data)
-    torrent = {}
-    torrentList = {}
+    torrentEven = []
+    torrentOdd = []
+    torrentList = []
     tmpFile = open('torrent_list.tmp', 'w')
 
     for info in soup.find_all(class_="even"):
+        torrent = {}
         name = info.find(class_="title")
         url = info.find(class_="quickdownload").find('a').get('href')
-        torrent[name.string] = 'http://torrentleech.org' + url
+        date = info.find(class_="name")
+        dateRegex = re.match("^.*(\d{4}[-]\d{2}[-]\d{2}\s\d{2}[:]\d{2}[:]\d{2}).*$",str(date),re.DOTALL)
+        torrent['name'] = str(name.string)
+        torrent['url'] = 'http://torrentleech.org' + url
+        torrent['date'] = dateRegex.group(1)
+        torrentEven.append(torrent)
 
     for info in soup.find_all(class_="odd"):
+        torrent = {}
         name = info.find(class_="title")
         url = info.find(class_="quickdownload").find('a').get('href')
-        torrent[name.string] = 'http://torrentleech.org' + url
+        date = info.find(class_="name")
+        dateRegex = re.match("^.*(\d{4}[-]\d{2}[-]\d{2}\s\d{2}[:]\d{2}[:]\d{2}).*$",str(date),re.DOTALL)
+        torrent['name'] = str(name.string)
+        torrent['url'] = 'http://torrentleech.org' + url
+        torrent['date'] = dateRegex.group(1)
+        torrentOdd.append(torrent)
 
-    torrentList = [{'name':key,'url':value} for key,value in torrent.items()]
+    torrentList = torrentEven + torrentOdd
     print >> tmpFile, json.dumps(torrentList, sort_keys=True)
 
     tmpFile.close()
