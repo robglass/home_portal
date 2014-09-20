@@ -9,7 +9,7 @@ router.get('/', function(req, res) {
 
 router.get('/torrents', function(req,res){
   fs.readFile('/var/www/home_portal/public/torrent/torrent_list.json', 'utf8', function(err, data){
-  	res.send(data);
+  	res.json(data);
   })
 })
 module.exports = router;
