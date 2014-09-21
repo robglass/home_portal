@@ -12,4 +12,20 @@ router.get('/torrents', function(req,res){
   	res.json(data);
   })
 })
+router.get('/fetch_torrents', function(req,res){
+  var process = require('child_process');
+    process.exec('python /var/www/home_portal/public/torrent/torrents.py', function(error){
+  	if (error !== null) {  
+		res.send(500, error.code); 
+	} else {
+   		res.json({ status: "done"} );
+	}
+    });
+})
+router.get('/lastUpdate', function(req,res){
+  var process = require('child_process');
+    process.exec('date -r /var/www/home_portal/public/torrent/torrent_list.json', function(error, out){
+		res.json({date: out});
+    });
+})
 module.exports = router;
