@@ -9,7 +9,7 @@ import shutil
 
 def auth():
     try:
-        authfile = open('.tlauth')
+        authfile = open('/var/www/home_portal/public/torrent/.tlauth','r')
         authdata = json.load(authfile)
         authurl = 'http://torrentleech.org/user/account/login/'
         username = authdata['name']
@@ -73,7 +73,7 @@ def gather(session):
     torrentList = []
 
     try:
-        tmpFile = open('torrent_list.tmp', 'w')
+        tmpFile = open('/var/www/home_portal/public/torrent/torrent_list.tmp', 'w')
         for x in range(1,6):
             targeturl = 'http://torrentleech.org/torrents/browse/index/categories/13%2C14/page/' + str(x)
             r = session.get(targeturl)
@@ -86,7 +86,7 @@ def gather(session):
 
 def validate():
     try:
-        tmpFile = open('torrent_list.tmp', 'r')
+        tmpFile = open('/var/www/home_portal/public/torrent/torrent_list.tmp', 'r')
 
         try:
             tmpJson = json.load(tmpFile)
@@ -102,4 +102,4 @@ def main():
 if __name__ == "__main__":
     main()
     if validate():
-        shutil.move('torrent_list.tmp','torrent_list.json')
+        shutil.move('/var/www/home_portal/public/torrent/torrent_list.tmp','/var/www/home_portal/public/torrent/torrent_list.json')
