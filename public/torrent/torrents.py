@@ -8,25 +8,33 @@ import sys
 import shutil
 
 def auth():
+    # Auth file that contains username and password in json format
+    authfile = open('/var/www/home_portal/public/torrent/.tlauth','r')
+
     try:
-        authfile = open('/var/www/home_portal/public/torrent/.tlauth','r')
+        # Grab the username and password and assign to proper variables
         authdata = json.load(authfile)
-        authurl = 'http://torrentleech.org/user/account/login/'
         username = authdata['name']
         password = authdata['password']
+        # This is the URL that you are presented with when you would log into the website via a browser
+        authurl = 'http://torrentleech.org/user/account/login/'
 
-        session = requests.session()
+        # Set the headers in order to authenticate with the targeturl
         req_headers = {
             'Content-Type': 'application/x-www-form-urlencoded'
         }
 
+        # Mimic the form login info that is provided on the website
         formdata = {
             'username': username,
             'password': password,
             'login': 'submit'
         }
 
-        # Authenticate
+        # Authenticate with the site.
+        # Successfull authentication provides a http code of 302 as it redirects you to the rest of the site.
+        # Catch this 302 and carry on with the rest of the script, otherwise dump out.
+        session = requests.session()
         r = session.post(authurl, data=formdata, headers=req_headers, allow_redirects=False)
         if r.status_code == 302:
             gather(session)
@@ -45,7 +53,7 @@ def parse(info):
     dateRegex = re.match("^.*(\d{4}[-]\d{2}[-]\d{2}\s\d{2}[:]\d{2}[:]\d{2}).*$",str(date),re.DOTALL)
     size = info.find_all('td')
     sizeRegex = re.match("^.*[<td>](\d.*)\s(\w\w)[</td>].*$",str(size),re.DOTALL)
-    torrent['name'] = str(name.string)
+    torrent['name'] = name.string
     torrent['url'] = 'http://torrentleech.org' + url
     torrent['date'] = dateRegex.group(1)
     torrent['size'] = sizeRegex.group(1) + ' ' + sizeRegex.group(2)
@@ -71,9 +79,9 @@ def getSoup(_class,data):
 
 def gather(session):
     torrentList = []
+    tmpFile = open('/var/www/home_portal/public/torrent/torrent_list.tmp', 'w')
 
     try:
-        tmpFile = open('/var/www/home_portal/public/torrent/torrent_list.tmp', 'w')
         for x in range(1,6):
             targeturl = 'http://torrentleech.org/torrents/browse/index/categories/13%2C14/page/' + str(x)
             r = session.get(targeturl)
@@ -85,9 +93,9 @@ def gather(session):
         tmpFile.close()
 
 def validate():
-    try:
-        tmpFile = open('/var/www/home_portal/public/torrent/torrent_list.tmp', 'r')
+    tmpFile = open('/var/www/home_portal/public/torrent/torrent_list.tmp', 'r')
 
+    try:
         try:
             tmpJson = json.load(tmpFile)
             return True
