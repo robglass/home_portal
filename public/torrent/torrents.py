@@ -45,8 +45,11 @@ def auth():
         authfile.close()
 
 def parse(info):
+    # Initialize the dictionary
     torrent = {}
 
+    # Gather the specific information that we are wanting to get.
+    # Get the name, url, date, and size of the torrent.
     name = info.find(class_="title")
     url = info.find(class_="quickdownload").find('a').get('href')
     date = info.find(class_="name")
@@ -58,6 +61,8 @@ def parse(info):
     torrent['date'] = dateRegex.group(1)
     torrent['size'] = sizeRegex.group(1) + ' ' + sizeRegex.group(2)
 
+    # Look for anything in GB size, and convert it to MB as to have everything in one factor.
+    # This is then later used to sort size on the website.
     if sizeRegex.group(2) == 'GB':
         sizemb = float(sizeRegex.group(1)) * 1024
     else:
@@ -71,32 +76,44 @@ def getSoup(_class,data):
     torrentList = []
     soup = BeautifulSoup(data)
 
+    # Use BeautifulSoup to get all http information for the specific class we are looking for then
+    # add that information to the list.
     for info in soup.find_all(class_=_class):
         torrent = parse(info)
         torrentList.append(torrent)
 
+    # Return the contents of the list back to the code that called this function in the first place.
     return torrentList
 
 def gather(session):
     torrentList = []
+    # Open/create a temp file for storage before overwritting the perm file that the website
+    # relys on. This way we can save off data and manipulate it, and not break anything.
     tmpFile = open('/var/www/home_portal/public/torrent/torrent_list.tmp', 'w')
 
     try:
+        # Scrape the first 5 pages of the targeturl and store that raw html data into the list and
+        # pass it off to getSoup for parsing.
         for x in range(1,6):
             targeturl = 'http://torrentleech.org/torrents/browse/index/categories/13%2C14/page/' + str(x)
             r = session.get(targeturl)
             data = r.text
             torrentList += getSoup('even',data) + getSoup('odd',data)
 
+        # Export all the data to json format and save it to a temp file for later use.
         print >> tmpFile, json.dumps(torrentList, sort_keys=True)
     finally:
         tmpFile.close()
 
 def validate():
+    # Reopen the temp file but with readonly rights this time.
     tmpFile = open('/var/www/home_portal/public/torrent/torrent_list.tmp', 'r')
 
     try:
         try:
+            # Attempt to load the temp file up using a json parser.
+            # If it passes, we now know the temp file is proper json format.
+            # If it fails, we do not have proper json and something else broke upstream.
             tmpJson = json.load(tmpFile)
             return True
         except ValueError:
@@ -109,5 +126,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+    # If the temp file is confirmed to be proper json, go ahead only at this time, overwrite the perm file.
+    # Thus updating the results that show on the website.
     if validate():
         shutil.move('/var/www/home_portal/public/torrent/torrent_list.tmp','/var/www/home_portal/public/torrent/torrent_list.json')
