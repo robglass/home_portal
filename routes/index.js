@@ -28,4 +28,9 @@ router.get('/lastUpdate', function(req,res){
 		res.json({date: out});
     });
 })
+router.get('/grocery', function(req,res){
+  fs.readFile('/var/www/home_portal/public/grocery/grocery_list.json', 'utf8', function(err, data){
+  	res.json(data);
+  })
+})
 module.exports = router;

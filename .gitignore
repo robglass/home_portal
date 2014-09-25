@@ -1,3 +1,5 @@
-.tlauth
+.*
+!/.gitignore
 torrent_list*
+grocery_list*
 node_modules*
