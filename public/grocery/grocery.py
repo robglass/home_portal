@@ -7,9 +7,7 @@ import shutil
 import sys
 
 def auth():
-    authfile = open('/var/www/home_portal/public/grocery/.htauth','r')
-
-    try:
+    with open('/var/www/home_portal/public/grocery/.htauth','r') as authfile:
         authdata = json.load(authfile)
         granttype = authdata['granttype']
         username = authdata['username']
@@ -36,14 +34,9 @@ def auth():
         tokendata = json.loads(r.text)
         gather(session, tokendata)
 
-    finally:
-        authfile.close()
-
 def gather(session, tokendata):
     groceryList = []
-    tmpFile = open('/var/www/home_portal/public/grocery/grocery_list.tmp','w')
-
-    try:
+    with open('/var/www/home_portal/public/grocery/grocery_list.tmp','w+') as tmpFile:
         token = tokendata['access_token']
         get_headers = {
                 "Authorization": "Bearer " + token,
@@ -55,24 +48,28 @@ def gather(session, tokendata):
             data = r.text
             groceryList.append(data)
 
-        print >> tmpFile, json.dumps(groceryList)
-    finally:
-        tmpFile.close()
+        for line in groceryList:
+            print >> tmpFile, line.encode('ascii', 'ignore') + ','
+
+def fix_format():
+    with open('/var/www/home_portal/public/grocery/grocery_list.tmp','r+') as tmpFile:
+        content = tmpFile.read()
+        tmpFile.seek(0)
+        tmpFile.write('[' + content )
+        newcontent = re.sub(r',$', ']', content).rstrip('\n')
+        print >> tmpFile, newcontent
 
 def validate():
-    tmpFile = open('/var/www/home_portal/public/grocery/grocery_list.tmp','r')
-
-    try:
+    with open('/var/www/home_portal/public/grocery/grocery_list.tmp','r') as tmpFile:
         try:
             tmpJson = json.load(tmpFile)
             return True
         except ValueError:
             return False
-    finally:
-        tmpFile.close()
 
 def main():
     auth()
+    fix_format()
 
 if __name__ == "__main__":
     main()
